@@ -132,7 +132,7 @@ Built with **Go + React (Wails v2)**. No browser required. No cloud dependency. 
 
 > **Note:** Windows Defender may show a SmartScreen warning for unsigned binaries.
 > This is expected for Go/Wails applications. You can verify the file on
-> [VirusTotal](https://www.virustotal.com/gui/file/8c6bd3d7df7a54c005de75365b9af1b9f314b23671bcf858472a282ca61f50dc).
+> [VirusTotal](https://www.virustotal.com/gui/file/5463c0e137396276b25f8dc9551755d80c6d9635e3f102df1c8b5a58a2ebf2a2).
 
 ### Build from Source
 ```bash
