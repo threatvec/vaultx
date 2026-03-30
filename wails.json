@@ -1,0 +1,19 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "VAULTX",
+  "outputfilename": "vaultx",
+  "frontend:install": "npm install --legacy-peer-deps",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "threatvec & talkdedsec",
+    "email": "threatvec@users.noreply.github.com"
+  },
+  "info": {
+    "productName": "VAULTX",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright 2026 threatvec & talkdedsec. All Rights Reserved.",
+    "comments": "One tool. Zero blind spots."
+  }
+}

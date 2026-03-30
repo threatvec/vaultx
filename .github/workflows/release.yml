@@ -1,0 +1,193 @@
+# Copyright (c) 2026 threatvec & talkdedsec. All Rights Reserved.
+# VAULTX Automated Build & Release Pipeline
+
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: vaultx
+  NODE_VERSION: '20'
+  GO_VERSION: '1.24'
+
+jobs:
+  # ─── Windows Build ──────────────────────────────────────────────
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Build Windows
+        run: wails build -clean -platform windows/amd64
+
+      - name: Rename binary
+        run: |
+          mv build/bin/vaultx.exe build/bin/vaultx-windows-amd64.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaultx-windows
+          path: build/bin/vaultx-windows-amd64.exe
+
+  # ─── Linux Build ────────────────────────────────────────────────
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Build Linux
+        run: wails build -clean -platform linux/amd64
+
+      - name: Rename binary
+        run: mv build/bin/vaultx build/bin/vaultx-linux-amd64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaultx-linux
+          path: build/bin/vaultx-linux-amd64
+
+  # ─── macOS Build ────────────────────────────────────────────────
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install --legacy-peer-deps
+
+      - name: Build macOS
+        run: wails build -clean -platform darwin/universal
+
+      - name: Create DMG-ready archive
+        run: |
+          cd build/bin
+          if [ -d "vaultx.app" ]; then
+            zip -r vaultx-macos-universal.zip vaultx.app
+          else
+            mv vaultx vaultx-macos-universal
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaultx-macos
+          path: build/bin/vaultx-macos-*
+
+  # ─── Create GitHub Release ──────────────────────────────────────
+  create-release:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd release-artifacts
+          find . -type f -not -name "SHA256SUMS.txt" | while read f; do
+            sha256sum "$f" >> SHA256SUMS.txt
+          done
+          cat SHA256SUMS.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "VAULTX ${{ github.ref_name }}"
+          body: |
+            ## VAULTX ${{ github.ref_name }}
+
+            > One tool. Zero blind spots.
+            > Made by threatvec & talkdedsec
+
+            ### Downloads
+
+            | Platform | File |
+            |----------|------|
+            | Windows (x64) | `vaultx-windows-amd64.exe` |
+            | Linux (x64) | `vaultx-linux-amd64` |
+            | macOS (Universal) | `vaultx-macos-universal` |
+
+            ### Verify Downloads
+            Compare the SHA256 checksum of your download with `SHA256SUMS.txt`.
+
+            ### What's New
+            See [CHANGELOG](https://github.com/threatvec/vaultx/blob/main/CHANGELOG.md) for details.
+
+            ---
+            **Note:** This update is mandatory. Older versions will prompt you to update.
+          files: |
+            release-artifacts/**/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

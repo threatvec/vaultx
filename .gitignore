@@ -1,0 +1,84 @@
+# ── Build outputs ──────────────────────────────────────────────────
+build/bin/
+build/windows/
+build/linux/
+build/darwin/
+dist/
+*.exe
+*.dmg
+*.AppImage
+
+# ── Frontend ────────────────────────────────────────────────────────
+frontend/dist/
+frontend/node_modules/
+frontend/.vite/
+
+# ── Go ──────────────────────────────────────────────────────────────
+vendor/
+*.test
+*.out
+*.prof
+
+# ── Database & Keys ─────────────────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+keyfile
+vaultx.db
+internal/db/vaultx.db
+
+# ── User data directories ────────────────────────────────────────────
+# %APPDATA%/VAULTX/ and equivalents - never commit user data
+AppData/
+.config/vaultx/
+
+# ── Wails dev cache ─────────────────────────────────────────────────
+frontend/wailsjs/go/main/App.js.map
+
+# ── Environment / secrets ───────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+secrets.json
+
+# ── OS files ────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ── IDE & editor ────────────────────────────────────────────────────
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+*.swp
+*.swo
+*~
+
+# ── Logs ────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Temp ────────────────────────────────────────────────────────────
+*.tmp
+*.temp
+.cache/
+
+# ── Project-specific ────────────────────────────────────────────────
+prompts/
+.claude/
+
+# ── Backup files (created by this project's backup script) ──────────
+vaultx_backup_*/
